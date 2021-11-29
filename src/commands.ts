@@ -172,8 +172,10 @@ export const queueCommand: Command = {
 
       const embed = new MessageEmbed()
         .setTitle(`Queue for ${guild.name}`)
-        .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`)
-        .addField(
+        .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`);
+
+      if (songs.length > 0)
+        embed.addField(
           'Up Next',
           songs
             .map((song, index) => `\`${index + 1}.\` ${songAsText(song)}`)
