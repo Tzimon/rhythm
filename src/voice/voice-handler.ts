@@ -40,7 +40,7 @@ const queueSong = (song: Song, guild: Guild): Queue => {
   return queue;
 };
 
-const getQueue = (guild: Guild): Queue => {
+export const getQueue = (guild: Guild): Queue => {
   let queue = queues.get(guild);
 
   if (!queue) {
@@ -68,16 +68,20 @@ const getSong = async (requester: User, search: string): Promise<Song> => {
 
   if (!validateURL(songUrl)) throw 'No matches';
 
-  const info = await getInfo(songUrl);
+  try {
+    const info = await getInfo(songUrl);
 
-  return {
-    title: info.videoDetails.title,
-    url: songUrl,
-    duration: +info.videoDetails.lengthSeconds,
-    channelName: info.videoDetails.ownerChannelName,
-    thumbnailUrl: info.videoDetails.thumbnails[0].url,
-    requester,
-  };
+    return {
+      title: info.videoDetails.title,
+      url: songUrl,
+      duration: +info.videoDetails.lengthSeconds,
+      channelName: info.videoDetails.ownerChannelName,
+      thumbnailUrl: info.videoDetails.thumbnails[0].url,
+      requester,
+    };
+  } catch {
+    throw 'Video unavailable';
+  }
 };
 
 const playQueue = async (

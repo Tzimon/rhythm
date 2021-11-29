@@ -1,8 +1,13 @@
 import { MessageEmbed } from 'discord.js';
 import type { Command } from './types/command.type';
-import { createCurrentSongEmbed, getDurationFormatted } from './utils';
+import {
+  createCurrentSongEmbed,
+  getDurationFormatted,
+  songAsText,
+} from './utils';
 import {
   getCurrentSong,
+  getQueue,
   join,
   leave,
   play,
@@ -147,6 +152,35 @@ export const grabCommand: Command = {
     try {
       const currentSong = getCurrentSong(guild);
       member.send({ embeds: [createCurrentSongEmbed(guild, currentSong)] });
+    } catch (error) {
+      channel.send(`**❌ ${error}**`);
+    }
+  },
+};
+
+export const queueCommand: Command = {
+  name: 'queue',
+  aliases: ['q'],
+  execute: async (commandInfo) => {
+    const { member, channel } = commandInfo;
+    const { guild } = member;
+
+    try {
+      const { currentSong, songs } = getQueue(guild);
+
+      if (!currentSong) throw 'Nothing playing in your server';
+
+      const embed = new MessageEmbed()
+        .setTitle(`Queue for ${guild.name}`)
+        .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`)
+        .addField(
+          'Up Next',
+          songs
+            .map((song, index) => `\`${index + 1}.\` ${songAsText(song)}`)
+            .join('\n\n')
+        );
+
+      channel.send({ embeds: [embed] });
     } catch (error) {
       channel.send(`**❌ ${error}**`);
     }

@@ -1,4 +1,4 @@
-import { Guild, MessageEmbed } from 'discord.js';
+import { EmbedFieldData, Guild, MessageEmbed } from 'discord.js';
 import { Song } from './types/queue.type';
 
 export const createCurrentSongEmbed = (
@@ -6,7 +6,6 @@ export const createCurrentSongEmbed = (
   song: Song
 ): MessageEmbed => {
   return new MessageEmbed()
-    .setColor('#55ffaa')
     .setTitle('Currently playing 🎵')
     .setDescription(
       `[${song.title}](${song.url})
@@ -17,6 +16,11 @@ export const createCurrentSongEmbed = (
     )
     .setFooter(`${getDateFormatted(new Date())} - ${guild.name}`);
 };
+
+export const songAsText = (song: Song) =>
+  `[${song.title}](${song.url}) · (\`${getDurationFormatted(
+    song.duration
+  )}\`) Requested by <@${song.requester.id}>`;
 
 export const getDurationFormatted = (duration: number) => {
   const durationFormatted = `${Math.floor(duration / 60)}:${duration % 60}`;
