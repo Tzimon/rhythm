@@ -52,22 +52,29 @@ export class Bot {
 
     try {
       for (const command of Object.values(commands)) {
-        if (command.name.toLowerCase() === commandName)
-          return this.tryExecute(command, commandInfo);
+        if (command.name.toLowerCase() === commandName) {
+          this.tryExecute(command, commandInfo);
+          return;
+        }
       }
 
       for (const command of Object.values(commands)) {
         for (const alias of command.aliases) {
-          if (alias.toLowerCase() === commandName)
-            return this.tryExecute(command, commandInfo);
+          if (alias.toLowerCase() === commandName) {
+            this.tryExecute(command, commandInfo);
+            return;
+          }
         }
       }
     } catch {}
   }
 
-  private tryExecute(command: Command, commandInfo: CommandInfo): void {
+  private async tryExecute(
+    command: Command,
+    commandInfo: CommandInfo
+  ): Promise<void> {
     try {
-      command.execute(commandInfo);
+      await command.execute(commandInfo);
     } catch (error) {
       commandInfo.channel.send(`**❌ ${error}**`);
     }

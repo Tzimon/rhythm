@@ -30,7 +30,7 @@ export const joinCommand: Command = {
 export const leaveCommand: Command = {
   name: 'leave',
   aliases: ['l', 'disconnect', 'dc', 'fuckoff'],
-  execute: (commandInfo) => {
+  execute: async (commandInfo) => {
     const { member } = commandInfo;
 
     leave(member.guild);
