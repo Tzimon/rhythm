@@ -22,14 +22,8 @@ export const joinCommand: Command = {
   execute: async (commandInfo) => {
     const { member, channel } = commandInfo;
 
-    await channel.sendTyping();
-
-    try {
-      const voiceChannel = await join(member);
-      channel.send(`**👍 Joined \`${voiceChannel.name}\`**`);
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    const voiceChannel = await join(member);
+    channel.send(`**👍 Joined \`${voiceChannel.name}\`**`);
   },
 };
 
@@ -37,13 +31,9 @@ export const leaveCommand: Command = {
   name: 'leave',
   aliases: ['l', 'disconnect', 'dc', 'fuckoff'],
   execute: (commandInfo) => {
-    const { member, channel } = commandInfo;
+    const { member } = commandInfo;
 
-    try {
-      leave(member.guild);
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    leave(member.guild);
   },
 };
 
@@ -53,23 +43,21 @@ export const playCommand: Command = {
   execute: async (commandInfo) => {
     const { member, args, channel } = commandInfo;
 
+    if (args.length <= 0) throw 'Invalid syntax';
+
     const search = args.join(' ');
     const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
 
-    try {
-      const song = await play(member, search);
-      const embed = new MessageEmbed()
-        .setTitle(song.title)
-        .setURL(song.url)
-        .addField('Channel', song.channelName, true)
-        .addField('Song Duration', getDurationFormatted(song.duration), true)
-        .setAuthor('Added to queue')
-        .setThumbnail(song.thumbnailUrl);
+    const song = await play(member, search);
+    const embed = new MessageEmbed()
+      .setTitle(song.title)
+      .setURL(song.url)
+      .addField('Channel', song.channelName, true)
+      .addField('Song Duration', getDurationFormatted(song.duration), true)
+      .setAuthor('Added to queue')
+      .setThumbnail(song.thumbnailUrl);
 
-      searchingMessage.then(() => channel.send({ embeds: [embed] }));
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    searchingMessage.then(() => channel.send({ embeds: [embed] }));
   },
 };
 
@@ -81,12 +69,8 @@ export const skipCommand: Command = {
 
     await channel.sendTyping();
 
-    try {
-      await skip(member.guild);
-      channel.send(`**⏩ Skipped 👍**`);
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    await skip(member.guild);
+    channel.send(`**⏩ Skipped 👍**`);
   },
 };
 
@@ -98,12 +82,8 @@ export const loopCommand: Command = {
 
     await channel.sendTyping();
 
-    try {
-      const enabled = await toggleLoop(member.guild);
-      channel.send(`**🔂 ${enabled ? 'Enabled' : 'Disabled'}**`);
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    const enabled = await toggleLoop(member.guild);
+    channel.send(`**🔂 ${enabled ? 'Enabled' : 'Disabled'}**`);
   },
 };
 
@@ -115,12 +95,8 @@ export const loopQueueCommand: Command = {
 
     await channel.sendTyping();
 
-    try {
-      const enabled = await toggleQueueLoop(member.guild);
-      channel.send(`**🔁 ${enabled ? 'Enabled' : 'Disabled'}**`);
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    const enabled = await toggleQueueLoop(member.guild);
+    channel.send(`**🔁 ${enabled ? 'Enabled' : 'Disabled'}**`);
   },
 };
 
@@ -133,12 +109,8 @@ export const nowPlayingCommand: Command = {
 
     await channel.sendTyping();
 
-    try {
-      const currentSong = getCurrentSong(guild);
-      channel.send({ embeds: [createCurrentSongEmbed(guild, currentSong)] });
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    const currentSong = getCurrentSong(guild);
+    channel.send({ embeds: [createCurrentSongEmbed(guild, currentSong)] });
   },
 };
 
@@ -146,15 +118,11 @@ export const grabCommand: Command = {
   name: 'grab',
   aliases: [],
   execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
+    const { member } = commandInfo;
     const { guild } = member;
 
-    try {
-      const currentSong = getCurrentSong(guild);
-      member.send({ embeds: [createCurrentSongEmbed(guild, currentSong)] });
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    const currentSong = getCurrentSong(guild);
+    member.send({ embeds: [createCurrentSongEmbed(guild, currentSong)] });
   },
 };
 
@@ -165,26 +133,22 @@ export const queueCommand: Command = {
     const { member, channel } = commandInfo;
     const { guild } = member;
 
-    try {
-      const { currentSong, songs } = getQueue(guild);
+    const { currentSong, songs } = getQueue(guild);
 
-      if (!currentSong) throw 'Nothing playing in your server';
+    if (!currentSong) throw 'Nothing playing in your server';
 
-      const embed = new MessageEmbed()
-        .setTitle(`Queue for ${guild.name}`)
-        .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`);
+    const embed = new MessageEmbed()
+      .setTitle(`Queue for ${guild.name}`)
+      .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`);
 
-      if (songs.length > 0)
-        embed.addField(
-          'Up Next',
-          songs
-            .map((song, index) => `\`${index + 1}.\` ${songAsText(song)}`)
-            .join('\n\n')
-        );
+    if (songs.length > 0)
+      embed.addField(
+        'Up Next',
+        songs
+          .map((song, index) => `\`${index + 1}.\` ${songAsText(song)}`)
+          .join('\n\n')
+      );
 
-      channel.send({ embeds: [embed] });
-    } catch (error) {
-      channel.send(`**❌ ${error}**`);
-    }
+    channel.send({ embeds: [embed] });
   },
 };

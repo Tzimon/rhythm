@@ -2,7 +2,7 @@ import { Client } from 'discord.js';
 import * as commands from './commands';
 import type { ClientUser, Message } from 'discord.js';
 import type { Config } from './types/config.type';
-import type { CommandInfo } from './types/command.type';
+import type { Command, CommandInfo } from './types/command.type';
 
 export class Bot {
   private readonly client: Client;
@@ -52,20 +52,24 @@ export class Bot {
 
     try {
       for (const command of Object.values(commands)) {
-        if (command.name.toLowerCase() === commandName) {
-          command.execute(commandInfo);
-          return;
-        }
+        if (command.name.toLowerCase() === commandName)
+          return this.tryExecute(command, commandInfo);
       }
 
       for (const command of Object.values(commands)) {
         for (const alias of command.aliases) {
-          if (alias.toLowerCase() === commandName) {
-            command.execute(commandInfo);
-            return;
-          }
+          if (alias.toLowerCase() === commandName)
+            return this.tryExecute(command, commandInfo);
         }
       }
     } catch {}
+  }
+
+  private tryExecute(command: Command, commandInfo: CommandInfo): void {
+    try {
+      command.execute(commandInfo);
+    } catch (error) {
+      commandInfo.channel.send(`**❌ ${error}**`);
+    }
   }
 }
