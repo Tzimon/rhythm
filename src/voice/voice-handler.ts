@@ -12,6 +12,14 @@ import {
 import { Guild, GuildMember, User, VoiceChannel } from 'discord.js';
 import ytdl, { getInfo, validateURL } from 'ytdl-core';
 import ytsr, { getFilters } from 'ytsr';
+import {
+  EmptyQueueError,
+  IllegalChannelTypeError,
+  NoMatchesError,
+  NotConnectedError,
+  UserNotConnectedError,
+  VideoUnavailableError,
+} from '../errors';
 import { LoopMode, Queue, Song } from '../types/queue.type';
 
 const queues = new Map<Guild, Queue>();
@@ -66,7 +74,7 @@ const getSong = async (requester: User, search: string): Promise<Song> => {
     songUrl = result.items[0]?.url ?? '';
   }
 
-  if (!validateURL(songUrl)) throw 'No matches';
+  if (!validateURL(songUrl)) throw new NoMatchesError();
 
   try {
     const info = await getInfo(songUrl);
@@ -80,7 +88,7 @@ const getSong = async (requester: User, search: string): Promise<Song> => {
       requester,
     };
   } catch {
-    throw 'Video unavailable';
+    throw new VideoUnavailableError();
   }
 };
 
@@ -145,8 +153,8 @@ const getVoiceChannel = (member: GuildMember): VoiceChannel => {
   const { voice } = member;
   const { channel } = voice;
 
-  if (!channel) throw 'You have to be in a voice channel to use this command';
-  if (!(channel instanceof VoiceChannel)) throw 'I only support voice channels';
+  if (!channel) throw new UserNotConnectedError();
+  if (!(channel instanceof VoiceChannel)) throw new IllegalChannelTypeError();
 
   return channel;
 };
@@ -177,7 +185,7 @@ export const join = async (member: GuildMember): Promise<VoiceChannel> => {
 export const skip = async (guild: Guild): Promise<void> => {
   const { audioPlayer } = getQueue(guild);
 
-  if (!audioPlayer) throw 'Nothing playing in this server';
+  if (!audioPlayer) throw new EmptyQueueError();
 
   audioPlayer.stop();
 };
@@ -209,14 +217,13 @@ export const toggleQueueLoop = async (guild: Guild): Promise<boolean> => {
 export const getCurrentSong = (guild: Guild): Song => {
   const { currentSong } = getQueue(guild);
 
-  if (!currentSong) throw 'Nothing playing in this server';
+  if (!currentSong) throw new EmptyQueueError();
 
   return currentSong;
 };
 
 export const leave = (guild: Guild): void => {
-  if (!getVoiceConnection(guild.id))
-    throw 'I am not connected to a voice channel';
+  if (!getVoiceConnection(guild.id)) throw new NotConnectedError();
 
   disconnect(guild);
 };

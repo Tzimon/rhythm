@@ -1,4 +1,5 @@
 import { MessageEmbed } from 'discord.js';
+import { EmptyQueueError, InvalidSyntaxError } from './errors';
 import type { Command } from './types/command.type';
 import {
   createCurrentSongEmbed,
@@ -43,7 +44,7 @@ export const playCommand: Command = {
   execute: async (commandInfo) => {
     const { member, args, channel } = commandInfo;
 
-    if (args.length <= 0) throw 'Invalid syntax';
+    if (args.length <= 0) throw new InvalidSyntaxError();
 
     const search = args.join(' ');
     const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
@@ -135,7 +136,7 @@ export const queueCommand: Command = {
 
     const { currentSong, songs } = getQueue(guild);
 
-    if (!currentSong) throw 'Nothing playing in your server';
+    if (!currentSong) throw new EmptyQueueError();
 
     const embed = new MessageEmbed()
       .setTitle(`Queue for ${guild.name}`)
@@ -150,5 +151,15 @@ export const queueCommand: Command = {
       );
 
     channel.send({ embeds: [embed] });
+  },
+};
+
+export const seekCommand: Command = {
+  name: 'seek',
+  aliases: ['sk'],
+  execute: async (commandInfo) => {
+    const { args } = commandInfo;
+
+    if (args.length !== 1) throw new InvalidSyntaxError();
   },
 };

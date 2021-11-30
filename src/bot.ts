@@ -3,6 +3,7 @@ import * as commands from './commands';
 import type { ClientUser, Message } from 'discord.js';
 import type { Config } from './types/config.type';
 import type { Command, CommandInfo } from './types/command.type';
+import { BotError } from './errors';
 
 export class Bot {
   private readonly client: Client;
@@ -76,7 +77,8 @@ export class Bot {
     try {
       await command.execute(commandInfo);
     } catch (error) {
-      commandInfo.channel.send(`**❌ ${error}**`);
+      const botError = error as BotError;
+      commandInfo.channel.send(botError.toString());
     }
   }
 }
