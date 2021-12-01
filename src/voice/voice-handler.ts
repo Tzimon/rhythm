@@ -196,9 +196,10 @@ export const join = async (member: GuildMember): Promise<VoiceChannel> => {
 };
 
 export const skip = async (guild: Guild): Promise<void> => {
-  const { audioPlayer } = getQueue(guild);
+  const { audioPlayer, songs } = getQueue(guild);
 
-  if (!audioPlayer) throw new EmptyQueueError();
+  if (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing)
+    throw new EmptyQueueError();
 
   audioPlayer.stop();
 };
