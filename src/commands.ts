@@ -123,7 +123,7 @@ export const skipCommand: Command = {
 
 export const loopCommand: Command = {
   name: 'loop',
-  aliases: ['l'],
+  aliases: ['lo'],
   execute: async (commandInfo) => {
     const { member, channel } = commandInfo;
 
