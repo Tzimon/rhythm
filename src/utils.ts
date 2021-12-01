@@ -31,7 +31,7 @@ export const formatDuration = (duration: number) => {
   )}:${formatAs2Digit(duration % 60)}`;
 
   if (duration >= 60 * 60)
-    return `${Math.floor(duration / (60 * 60))} ${durationFormatted}`;
+    return `${Math.floor(duration / (60 * 60))}:${durationFormatted}`;
 
   return durationFormatted;
 };

@@ -101,7 +101,11 @@ const playQueue = async (
   const queue = getQueue(guild);
 
   const song = queue.songs.shift();
-  if (!song) return disconnect(guild);
+
+  if (!song) {
+    if (channel.members.size === 0) return disconnect(guild);
+    setTimeout(() => queue.songs.length === 1 && disconnect(guild), 5000 * 60);
+  }
 
   const connection = await connect(channel);
   const audioPlayer = createAudioPlayer();

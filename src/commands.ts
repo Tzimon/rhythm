@@ -200,12 +200,12 @@ export const queueCommand: Command = {
   },
 };
 
-export const seekCommand: Command = {
-  name: 'seek',
-  aliases: ['sk'],
-  execute: async (commandInfo) => {
-    const { args } = commandInfo;
+// export const seekCommand: Command = {
+//   name: 'seek',
+//   aliases: ['sk'],
+//   execute: async (commandInfo) => {
+//     const { args } = commandInfo;
 
-    if (args.length !== 1) throw new InvalidSyntaxError();
-  },
-};
+//     if (args.length !== 1) throw new InvalidSyntaxError();
+//   },
+// };
