@@ -78,7 +78,7 @@ export class Bot {
       await command.execute(commandInfo);
     } catch (error) {
       const botError = error as BotError;
-      commandInfo.channel.send(botError.toString());
+      commandInfo.channel.send(`**${botError.toString()}**`);
     }
   }
 }
