@@ -122,8 +122,12 @@ const playQueue = async (
 
   queue.audioPlayer = audioPlayer;
 
+  stream.on('error', () => playQueue(guild, channel));
+
   connection.subscribe(audioPlayer);
   audioPlayer.play(resource);
+
+  connection.receiver.subscribe;
 
   await entersState(audioPlayer, AudioPlayerStatus.Playing, 5000);
 
