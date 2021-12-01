@@ -104,7 +104,9 @@ const playQueue = async (
 
   if (!song) {
     if (channel.members.size === 0) return disconnect(guild);
+
     setTimeout(() => queue.songs.length === 1 && disconnect(guild), 5000 * 60);
+    return;
   }
 
   const connection = await connect(channel);
