@@ -41,9 +41,11 @@ const connect = async (channel: VoiceChannel): Promise<VoiceConnection> => {
   return await entersState(connection, VoiceConnectionStatus.Ready, 30000);
 };
 
-const queueSong = (song: Song, guild: Guild): Queue => {
+const queueSong = (song: Song, guild: Guild, top: boolean): Queue => {
   const queue = getQueue(guild);
-  queue.songs.push(song);
+
+  if (top) queue.songs.unshift(song);
+  else queue.songs.push(song);
 
   return queue;
 };
@@ -161,14 +163,15 @@ const getVoiceChannel = (member: GuildMember): VoiceChannel => {
 
 export const play = async (
   member: GuildMember,
-  search: string
+  search: string,
+  top: boolean
 ): Promise<Song> => {
   const { user, guild } = member;
 
   const channel = getVoiceChannel(member);
 
   const song = await getSong(user, search);
-  const queue = queueSong(song, guild);
+  const queue = queueSong(song, guild, top);
 
   if (!queue.currentSong) await playQueue(guild, channel);
 

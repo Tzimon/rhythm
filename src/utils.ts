@@ -1,4 +1,4 @@
-import { EmbedFieldData, Guild, MessageEmbed } from 'discord.js';
+import { Guild, MessageEmbed } from 'discord.js';
 import { Song } from './types/queue.type';
 
 export const createCurrentSongEmbed = (
@@ -10,20 +10,25 @@ export const createCurrentSongEmbed = (
     .setDescription(
       `[${song.title}](${song.url})
   
-      \`Duration:\` ${getDurationFormatted(song.duration)}
+      \`Duration:\` ${formatDuration(song.duration)}
 
       \`Requested by:\` <@${song.requester.id}>`
     )
-    .setFooter(`${getDateFormatted(new Date())} - ${guild.name}`);
+    .setFooter(`${formatDate(new Date())} - ${guild.name}`);
 };
 
 export const songAsText = (song: Song) =>
-  `[${song.title}](${song.url}) · (\`${getDurationFormatted(
+  `[${song.title}](${song.url}) · (\`${formatDuration(
     song.duration
   )}\`) Requested by <@${song.requester.id}>`;
 
-export const getDurationFormatted = (duration: number) => {
-  const durationFormatted = `${Math.floor(duration / 60)}:${duration % 60}`;
+export const formatDuration = (duration: number) => {
+  const formatAs2Digit = (number: number) =>
+    `${number < 10 ? '0' : ''}${number}`;
+
+  const durationFormatted = `${formatAs2Digit(
+    Math.floor(duration / 60)
+  )}:${formatAs2Digit(duration % 60)}`;
 
   if (duration >= 60 * 60)
     return `${Math.floor(duration / (60 * 60))} ${durationFormatted}`;
@@ -31,5 +36,5 @@ export const getDurationFormatted = (duration: number) => {
   return durationFormatted;
 };
 
-export const getDateFormatted = (date: Date): string =>
+export const formatDate = (date: Date): string =>
   `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;

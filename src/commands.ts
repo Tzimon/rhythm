@@ -1,11 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { EmptyQueueError, InvalidSyntaxError } from './errors';
 import type { Command } from './types/command.type';
-import {
-  createCurrentSongEmbed,
-  getDurationFormatted,
-  songAsText,
-} from './utils';
+import { createCurrentSongEmbed, formatDuration, songAsText } from './utils';
 import {
   getCurrentSong,
   getQueue,
@@ -49,13 +45,63 @@ export const playCommand: Command = {
     const search = args.join(' ');
     const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
 
-    const song = await play(member, search);
+    const song = await play(member, search, false);
     const embed = new MessageEmbed()
       .setTitle(song.title)
       .setURL(song.url)
       .addField('Channel', song.channelName, true)
-      .addField('Song Duration', getDurationFormatted(song.duration), true)
+      .addField('Song Duration', formatDuration(song.duration), true)
       .setAuthor('Added to queue')
+      .setThumbnail(song.thumbnailUrl);
+
+    searchingMessage.then(() => channel.send({ embeds: [embed] }));
+  },
+};
+
+export const playTopCommand: Command = {
+  name: 'playtop',
+  aliases: ['pt'],
+  execute: async (commandInfo) => {
+    const { member, args, channel } = commandInfo;
+
+    if (args.length <= 0) throw new InvalidSyntaxError();
+
+    const search = args.join(' ');
+    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
+
+    const song = await play(member, search, true);
+    const embed = new MessageEmbed()
+      .setTitle(song.title)
+      .setURL(song.url)
+      .addField('Channel', song.channelName, true)
+      .addField('Song Duration', formatDuration(song.duration), true)
+      .setAuthor('Added to top of queue')
+      .setThumbnail(song.thumbnailUrl);
+
+    searchingMessage.then(() => channel.send({ embeds: [embed] }));
+  },
+};
+
+export const playSkipCommand: Command = {
+  name: 'playskip',
+  aliases: ['ps'],
+  execute: async (commandInfo) => {
+    const { member, args, channel } = commandInfo;
+
+    if (args.length <= 0) throw new InvalidSyntaxError();
+
+    const search = args.join(' ');
+    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
+
+    await skip(member.guild);
+
+    const song = await play(member, search, true);
+    const embed = new MessageEmbed()
+      .setTitle(song.title)
+      .setURL(song.url)
+      .addField('Channel', song.channelName, true)
+      .addField('Song Duration', formatDuration(song.duration), true)
+      .setAuthor('Now Playing')
       .setThumbnail(song.thumbnailUrl);
 
     searchingMessage.then(() => channel.send({ embeds: [embed] }));
