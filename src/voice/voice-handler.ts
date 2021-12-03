@@ -201,11 +201,10 @@ export const skip = async (
 ): Promise<void> => {
   const { audioPlayer } = getQueue(guild);
 
-  if (
-    !ignoreEmpty &&
-    (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing)
-  )
-    throw new EmptyQueueError();
+  if (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing) {
+    if (!ignoreEmpty) throw new EmptyQueueError();
+    return;
+  }
 
   audioPlayer.stop();
 };
