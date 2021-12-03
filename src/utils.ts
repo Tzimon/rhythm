@@ -27,7 +27,7 @@ export const formatDuration = (duration: number) => {
     `${number < 10 ? '0' : ''}${number}`;
 
   const durationFormatted = `${formatAs2Digit(
-    Math.floor(duration / 60)
+    Math.floor((duration % (60 * 60)) / 60)
   )}:${formatAs2Digit(duration % 60)}`;
 
   if (duration >= 60 * 60)

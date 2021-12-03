@@ -42,10 +42,10 @@ export const playCommand: Command = {
 
     if (args.length <= 0) throw new InvalidSyntaxError();
 
-    const search = args.join(' ');
-    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
+    const query = args.join(' ');
+    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${query}\``);
 
-    const song = await play(member, search, false);
+    const song = await play(member, query, false);
     const embed = new MessageEmbed()
       .setTitle(song.title)
       .setURL(song.url)
@@ -66,10 +66,10 @@ export const playTopCommand: Command = {
 
     if (args.length <= 0) throw new InvalidSyntaxError();
 
-    const search = args.join(' ');
-    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
+    const query = args.join(' ');
+    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${query}\``);
 
-    const song = await play(member, search, true);
+    const song = await play(member, query, true);
     const embed = new MessageEmbed()
       .setTitle(song.title)
       .setURL(song.url)
@@ -90,10 +90,12 @@ export const playSkipCommand: Command = {
 
     if (args.length <= 0) throw new InvalidSyntaxError();
 
-    const search = args.join(' ');
-    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
+    const query = args.join(' ');
+    const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${query}\``);
 
-    const song = await play(member, search, true);
+    await skip(member.guild, true);
+
+    const song = await play(member, query, true);
     const embed = new MessageEmbed()
       .setTitle(song.title)
       .setURL(song.url)
@@ -101,8 +103,6 @@ export const playSkipCommand: Command = {
       .addField('Song Duration', formatDuration(song.duration), true)
       .setAuthor('Now Playing')
       .setThumbnail(song.thumbnailUrl);
-
-    await skip(member.guild, true);
 
     searchingMessage.then(() => channel.send({ embeds: [embed] }));
   },

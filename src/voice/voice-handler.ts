@@ -65,17 +65,10 @@ export const getQueue = (guild: Guild): Queue => {
   return queue;
 };
 
-const getSong = async (requester: User, search: string): Promise<Song> => {
-  let songUrl = search;
+const getSong = async (requester: User, query: string): Promise<Song> => {
+  let songUrl = query;
 
-  if (!validateURL(search)) {
-    const searchString = await getFilters(search);
-    const videoSearch = searchString.get('Type')!.get('Video')!;
-
-    const result: any = await ytsr(videoSearch.url!, { limit: 1 });
-    songUrl = result.items[0]?.url ?? '';
-  }
-
+  if (!validateURL(query)) songUrl = await searchSong(query);
   if (!validateURL(songUrl)) throw new NoMatchesError();
 
   try {
@@ -94,6 +87,18 @@ const getSong = async (requester: User, search: string): Promise<Song> => {
   }
 };
 
+const searchSong = async (query: string): Promise<string> => {
+  try {
+    const searchString = await getFilters(query);
+    const videoSearch = searchString.get('Type')!.get('Video')!;
+
+    const result: any = await ytsr(videoSearch.url!, { limit: 1 });
+    return result.items[0]?.url ?? '';
+  } catch {
+    return await searchSong(query);
+  }
+};
+
 const playQueue = async (
   guild: Guild,
   channel: VoiceChannel
@@ -105,7 +110,7 @@ const playQueue = async (
   if (!song) {
     if (channel.members.size === 0) return disconnect(guild);
 
-    setTimeout(() => queue.songs.length === 0 && disconnect(guild), 5000 * 60);
+    setTimeout(() => queue.currentSong && disconnect(guild), 5000 * 60);
     return;
   }
 
@@ -126,8 +131,6 @@ const playQueue = async (
 
   connection.subscribe(audioPlayer);
   audioPlayer.play(resource);
-
-  connection.receiver.subscribe;
 
   await entersState(audioPlayer, AudioPlayerStatus.Playing, 5000);
 
@@ -173,14 +176,14 @@ const getVoiceChannel = (member: GuildMember): VoiceChannel => {
 
 export const play = async (
   member: GuildMember,
-  search: string,
+  query: string,
   top: boolean
 ): Promise<Song> => {
   const { user, guild } = member;
 
   const channel = getVoiceChannel(member);
 
-  const song = await getSong(user, search);
+  const song = await getSong(user, query);
   const queue = queueSong(song, guild, top);
 
   if (!queue.currentSong) await playQueue(guild, channel);
