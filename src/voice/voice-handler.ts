@@ -105,7 +105,7 @@ const playQueue = async (
   if (!song) {
     if (channel.members.size === 0) return disconnect(guild);
 
-    setTimeout(() => queue.songs.length === 1 && disconnect(guild), 5000 * 60);
+    setTimeout(() => queue.songs.length === 0 && disconnect(guild), 5000 * 60);
     return;
   }
 
@@ -195,10 +195,16 @@ export const join = async (member: GuildMember): Promise<VoiceChannel> => {
   return channel;
 };
 
-export const skip = async (guild: Guild): Promise<void> => {
-  const { audioPlayer, songs } = getQueue(guild);
+export const skip = async (
+  guild: Guild,
+  ignoreEmpty: boolean
+): Promise<void> => {
+  const { audioPlayer } = getQueue(guild);
 
-  if (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing)
+  if (
+    !ignoreEmpty &&
+    (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing)
+  )
     throw new EmptyQueueError();
 
   audioPlayer.stop();

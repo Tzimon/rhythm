@@ -93,8 +93,6 @@ export const playSkipCommand: Command = {
     const search = args.join(' ');
     const searchingMessage = channel.send(`**🎵 Searching 🔎** \`${search}\``);
 
-    await skip(member.guild);
-
     const song = await play(member, search, true);
     const embed = new MessageEmbed()
       .setTitle(song.title)
@@ -103,6 +101,8 @@ export const playSkipCommand: Command = {
       .addField('Song Duration', formatDuration(song.duration), true)
       .setAuthor('Now Playing')
       .setThumbnail(song.thumbnailUrl);
+
+    await skip(member.guild, true);
 
     searchingMessage.then(() => channel.send({ embeds: [embed] }));
   },
@@ -116,7 +116,7 @@ export const skipCommand: Command = {
 
     await channel.sendTyping();
 
-    await skip(member.guild);
+    await skip(member.guild, false);
     channel.send(`**⏩ Skipped 👍**`);
   },
 };
