@@ -35,3 +35,8 @@ export class UserNotConnectedError extends BotError {
 export class IllegalChannelTypeError extends BotError {
   message = 'I only support casual voice channels';
 }
+
+export class UnexpectedError extends BotError {
+  message = 'An unexpected error occured';
+  specialEmoji = '🤡';
+}

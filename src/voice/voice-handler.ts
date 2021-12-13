@@ -17,6 +17,7 @@ import {
   IllegalChannelTypeError,
   NoMatchesError,
   NotConnectedError,
+  UnexpectedError,
   UserNotConnectedError,
   VideoUnavailableError,
 } from '../errors';
@@ -99,6 +100,17 @@ const searchSong = async (query: string): Promise<string> => {
   }
 };
 
+const createStream = (url: string) => {
+  while (true) {
+    try {
+      return ytdl(url, {
+        filter: 'audioonly',
+        quality: 'highestaudio',
+      });
+    } catch {}
+  }
+};
+
 const playQueue = async (
   guild: Guild,
   channel: VoiceChannel
@@ -110,17 +122,16 @@ const playQueue = async (
   if (!song) {
     if (channel.members.size === 0) return disconnect(guild);
 
-    setTimeout(() => queue.currentSong && disconnect(guild), 5000 * 60);
+    setTimeout(() => {
+      if (getQueue(guild).currentSong) disconnect(guild), 5 * 60 * 1000;
+    });
     return;
   }
 
   const connection = await connect(channel);
   const audioPlayer = createAudioPlayer();
-  const stream = ytdl(song.url, {
-    filter: 'audioonly',
-    quality: 'highestaudio',
-    highWaterMark: 1 << 25,
-  });
+  const stream = createStream(song.url);
+
   const resource = createAudioResource(stream, {
     inputType: StreamType.Arbitrary,
   });
