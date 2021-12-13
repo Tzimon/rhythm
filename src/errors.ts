@@ -12,7 +12,7 @@ export class InvalidSyntaxError extends BotError {
   specialEmoji = '🥴';
 }
 
-export class EmptyQueueError extends BotError {
+export class NothingPlayingError extends BotError {
   message = 'Nothing playing in your server';
 }
 
@@ -36,7 +36,12 @@ export class IllegalChannelTypeError extends BotError {
   message = 'I only support casual voice channels';
 }
 
-export class UnexpectedError extends BotError {
-  message = 'An unexpected error occured';
+export class OutOfRangeError extends BotError {
+  message: string;
   specialEmoji = '🤡';
+
+  public constructor(minimum: number, maximum: number) {
+    super();
+    this.message = `Number is out of range: ${minimum} - ${maximum}`;
+  }
 }

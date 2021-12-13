@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { EmptyQueueError, InvalidSyntaxError } from './errors';
+import { NothingPlayingError, InvalidSyntaxError } from './errors';
 import type { Command } from './types/command.type';
 import { createCurrentSongEmbed, formatDuration, songAsText } from './utils';
 import {
@@ -8,6 +8,7 @@ import {
   join,
   leave,
   play,
+  setVolume,
   skip,
   toggleLoop,
   toggleQueueLoop,
@@ -16,9 +17,7 @@ import {
 export const joinCommand: Command = {
   name: 'join',
   aliases: ['j', 'fuckon'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
-
+  execute: async ({ member, channel }) => {
     const voiceChannel = await join(member);
     channel.send(`**👍 Joined \`${voiceChannel.name}\`**`);
   },
@@ -27,19 +26,13 @@ export const joinCommand: Command = {
 export const leaveCommand: Command = {
   name: 'leave',
   aliases: ['l', 'disconnect', 'dc', 'fuckoff'],
-  execute: async (commandInfo) => {
-    const { member } = commandInfo;
-
-    leave(member.guild);
-  },
+  execute: async ({ member }) => leave(member.guild),
 };
 
 export const playCommand: Command = {
   name: 'play',
   aliases: ['p'],
-  execute: async (commandInfo) => {
-    const { member, args, channel } = commandInfo;
-
+  execute: async ({ member, args, channel }) => {
     if (args.length <= 0) throw new InvalidSyntaxError();
 
     const query = args.join(' ');
@@ -61,9 +54,7 @@ export const playCommand: Command = {
 export const playTopCommand: Command = {
   name: 'playtop',
   aliases: ['pt'],
-  execute: async (commandInfo) => {
-    const { member, args, channel } = commandInfo;
-
+  execute: async ({ member, args, channel }) => {
     if (args.length <= 0) throw new InvalidSyntaxError();
 
     const query = args.join(' ');
@@ -85,9 +76,7 @@ export const playTopCommand: Command = {
 export const playSkipCommand: Command = {
   name: 'playskip',
   aliases: ['ps'],
-  execute: async (commandInfo) => {
-    const { member, args, channel } = commandInfo;
-
+  execute: async ({ member, args, channel }) => {
     if (args.length <= 0) throw new InvalidSyntaxError();
 
     const query = args.join(' ');
@@ -111,9 +100,7 @@ export const playSkipCommand: Command = {
 export const skipCommand: Command = {
   name: 'skip',
   aliases: ['s', 'next'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
-
+  execute: async ({ member, channel }) => {
     await channel.sendTyping();
 
     await skip(member.guild, false);
@@ -124,9 +111,7 @@ export const skipCommand: Command = {
 export const loopCommand: Command = {
   name: 'loop',
   aliases: ['lo'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
-
+  execute: async ({ member, channel }) => {
     await channel.sendTyping();
 
     const enabled = await toggleLoop(member.guild);
@@ -137,9 +122,7 @@ export const loopCommand: Command = {
 export const loopQueueCommand: Command = {
   name: 'loopqueue',
   aliases: ['lq'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
-
+  execute: async ({ member, channel }) => {
     await channel.sendTyping();
 
     const enabled = await toggleQueueLoop(member.guild);
@@ -150,8 +133,7 @@ export const loopQueueCommand: Command = {
 export const nowPlayingCommand: Command = {
   name: 'nowplaying',
   aliases: ['np'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
+  execute: async ({ member, channel }) => {
     const { guild } = member;
 
     await channel.sendTyping();
@@ -164,8 +146,7 @@ export const nowPlayingCommand: Command = {
 export const grabCommand: Command = {
   name: 'grab',
   aliases: [],
-  execute: async (commandInfo) => {
-    const { member } = commandInfo;
+  execute: async ({ member }) => {
     const { guild } = member;
 
     const currentSong = getCurrentSong(guild);
@@ -176,17 +157,18 @@ export const grabCommand: Command = {
 export const queueCommand: Command = {
   name: 'queue',
   aliases: ['q'],
-  execute: async (commandInfo) => {
-    const { member, channel } = commandInfo;
+  execute: async ({ member, channel }) => {
     const { guild } = member;
 
-    const { currentSong, songs } = getQueue(guild);
+    const { playing, songs } = getQueue(guild);
 
-    if (!currentSong) throw new EmptyQueueError();
+    if (!playing) throw new NothingPlayingError();
+
+    const { song } = playing;
 
     const embed = new MessageEmbed()
       .setTitle(`Queue for ${guild.name}`)
-      .addField('Now Playing', `[${currentSong.title}](${currentSong.url})`);
+      .addField('Now Playing', `[${song.title}](${song.url})`);
 
     if (songs.length > 0)
       embed.addField(
@@ -200,12 +182,20 @@ export const queueCommand: Command = {
   },
 };
 
-// export const seekCommand: Command = {
-//   name: 'seek',
-//   aliases: ['sk'],
-//   execute: async (commandInfo) => {
-//     const { args } = commandInfo;
+export const volumeCommand: Command = {
+  name: 'volume',
+  aliases: ['vol'],
+  execute: async ({ args, channel, member }) => {
+    const { guild } = member;
 
-//     if (args.length !== 1) throw new InvalidSyntaxError();
-//   },
-// };
+    if (args.length !== 1) throw new InvalidSyntaxError();
+
+    const volume: number = +args[0];
+
+    if (!Number.isInteger(volume)) throw new InvalidSyntaxError();
+
+    setVolume(guild, volume);
+
+    channel.send(`**🔊 Set volume to ${volume}%**`);
+  },
+};

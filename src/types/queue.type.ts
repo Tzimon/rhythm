@@ -1,11 +1,10 @@
-import { AudioPlayer } from '@discordjs/voice';
+import { AudioPlayer, AudioResource } from '@discordjs/voice';
 import { User } from 'discord.js';
 
 export interface Queue {
   songs: Array<Song>;
-  currentSong?: Song;
   loopMode: LoopMode;
-  audioPlayer?: AudioPlayer;
+  playing?: CurrentSongInfo;
 }
 
 export interface Song {
@@ -15,6 +14,12 @@ export interface Song {
   channelName: string;
   thumbnailUrl: string;
   requester: User;
+}
+
+export interface CurrentSongInfo {
+  song: Song;
+  audioPlayer: AudioPlayer;
+  resource: AudioResource;
 }
 
 export enum LoopMode {

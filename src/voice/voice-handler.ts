@@ -9,15 +9,15 @@ import {
   VoiceConnection,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { Guild, GuildMember, User, VoiceChannel } from 'discord.js';
+import { Channel, Guild, GuildMember, User, VoiceChannel } from 'discord.js';
 import ytdl, { getInfo, validateURL } from 'ytdl-core';
 import ytsr, { getFilters } from 'ytsr';
 import {
-  EmptyQueueError,
   IllegalChannelTypeError,
   NoMatchesError,
   NotConnectedError,
-  UnexpectedError,
+  NothingPlayingError,
+  OutOfRangeError,
   UserNotConnectedError,
   VideoUnavailableError,
 } from '../errors';
@@ -123,20 +123,19 @@ const playQueue = async (
     if (channel.members.size === 0) return disconnect(guild);
 
     setTimeout(() => {
-      if (getQueue(guild).currentSong) disconnect(guild), 5 * 60 * 1000;
+      if (getQueue(guild).playing) disconnect(guild), 5 * 60 * 1000;
     });
     return;
   }
 
   const connection = await connect(channel);
   const audioPlayer = createAudioPlayer();
-  const stream = createStream(song.url);
 
+  const stream = createStream(song.url);
   const resource = createAudioResource(stream, {
     inputType: StreamType.Arbitrary,
+    inlineVolume: true,
   });
-
-  queue.audioPlayer = audioPlayer;
 
   stream.on('error', () => playQueue(guild, channel));
 
@@ -145,10 +144,10 @@ const playQueue = async (
 
   await entersState(audioPlayer, AudioPlayerStatus.Playing, 5000);
 
-  queue.currentSong = song;
+  queue.playing = { song, audioPlayer, resource };
 
   audioPlayer.on(AudioPlayerStatus.Idle, () => {
-    delete queue.currentSong;
+    delete queue.playing;
 
     switch (queue.loopMode) {
       case LoopMode.LOOP_SONG:
@@ -171,8 +170,7 @@ const disconnect = (guild: Guild): void => {
   const queue = getQueue(guild);
 
   queue.songs = [];
-  delete queue.currentSong;
-  delete queue.audioPlayer;
+  delete queue.playing;
 };
 
 const getVoiceChannel = (member: GuildMember): VoiceChannel => {
@@ -197,7 +195,7 @@ export const play = async (
   const song = await getSong(user, query);
   const queue = queueSong(song, guild, top);
 
-  if (!queue.currentSong) await playQueue(guild, channel);
+  if (!queue.playing) await playQueue(guild, channel);
 
   return song;
 };
@@ -213,14 +211,17 @@ export const skip = async (
   guild: Guild,
   ignoreEmpty: boolean
 ): Promise<void> => {
-  const { audioPlayer } = getQueue(guild);
+  const { playing } = getQueue(guild);
 
-  if (!audioPlayer || audioPlayer.state.status !== AudioPlayerStatus.Playing) {
-    if (!ignoreEmpty) throw new EmptyQueueError();
+  if (
+    !playing ||
+    playing.audioPlayer.state.status !== AudioPlayerStatus.Playing
+  ) {
+    if (!ignoreEmpty) throw new NothingPlayingError();
     return;
   }
 
-  audioPlayer.stop();
+  playing.audioPlayer.stop();
 };
 
 export const toggleLoop = async (guild: Guild): Promise<boolean> => {
@@ -248,15 +249,33 @@ export const toggleQueueLoop = async (guild: Guild): Promise<boolean> => {
 };
 
 export const getCurrentSong = (guild: Guild): Song => {
-  const { currentSong } = getQueue(guild);
+  const { playing } = getQueue(guild);
 
-  if (!currentSong) throw new EmptyQueueError();
+  if (!playing) throw new NothingPlayingError();
 
-  return currentSong;
+  return playing.song;
 };
 
 export const leave = (guild: Guild): void => {
   if (!getVoiceConnection(guild.id)) throw new NotConnectedError();
 
   disconnect(guild);
+};
+
+// export const seek = (guild: Guild, time: number): void => {
+//   const { playing } = getQueue(guild);
+
+//   if (!playing) throw new NothingPlayingError();
+// };
+
+export const setVolume = (guild: Guild, volume: number): void => {
+  const maximum: number = 10000;
+
+  if (volume <= 0 || volume > maximum) throw new OutOfRangeError(0, maximum);
+
+  const { playing } = getQueue(guild);
+
+  if (!playing) throw new NothingPlayingError();
+
+  playing.resource.volume?.setVolume(volume / 100);
 };
