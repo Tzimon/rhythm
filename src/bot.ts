@@ -42,12 +42,10 @@ export class Bot {
     if (content.length === 0) return;
     if (!content.startsWith(this.config.defaultPrefix)) return;
 
-    const commandMessage = content.substring(this.config.defaultPrefix.length);
+    const args = content.slice(this.config.defaultPrefix.length).split(/ +/);
+    const commandName = args.shift()?.toLowerCase();
 
-    if (commandMessage.length === 0) return;
-
-    const args = commandMessage.split(' ');
-    const commandName = args.shift()!.toLowerCase();
+    if (!commandName) return;
 
     const commandInfo: CommandInfo = { author, channel, member, args };
 

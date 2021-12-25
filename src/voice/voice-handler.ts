@@ -100,17 +100,6 @@ const searchSong = async (query: string): Promise<string> => {
   }
 };
 
-const createStream = (url: string) => {
-  while (true) {
-    try {
-      return ytdl(url, {
-        filter: 'audioonly',
-        quality: 'highestaudio',
-      });
-    } catch {}
-  }
-};
-
 const playQueue = async (
   guild: Guild,
   channel: VoiceChannel
@@ -131,7 +120,10 @@ const playQueue = async (
   const connection = await connect(channel);
   const audioPlayer = createAudioPlayer();
 
-  const stream = createStream(song.url);
+  const stream = ytdl(song.url, {
+    filter: 'audioonly',
+    quality: 'highestaudio',
+  });
   const resource = createAudioResource(stream, {
     inputType: StreamType.Arbitrary,
     inlineVolume: true,
