@@ -1,12 +1,14 @@
 import { Client, IntentsString, TextBasedChannels } from 'discord.js';
 import type { ClientUser, Message } from 'discord.js';
+import { Command, CommandCallInfo, CommandLogger } from './core/command';
 import { joinCommand } from './commands/join-command';
 import { leaveCommand } from './commands/leave-command';
 import { playCommand } from './commands/play-command';
 import { skipCommand } from './commands/skip-command';
-import { Command, CommandCallInfo, CommandLogger } from './core/command';
 import { playSkipCommand } from './commands/play-skip-command';
 import { loopCommand } from './commands/loop-command';
+import { loopQueueCommand } from './commands/loop-queue-command';
+import { nowPlayingCommand } from './commands/now-playing';
 
 const defaultPrefix: string = '!';
 
@@ -25,6 +27,8 @@ const commands: Array<Command> = [
   skipCommand,
   playSkipCommand,
   loopCommand,
+  loopQueueCommand,
+  nowPlayingCommand,
 ];
 
 export class Bot {

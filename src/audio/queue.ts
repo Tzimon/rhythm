@@ -94,6 +94,11 @@ export class Queue {
 
     this.currentTrack.audioPlayer.stop();
   }
+
+  public get playingTrack(): Track {
+    if (!this.currentTrack) throw new NothingPlayingError();
+    return this.currentTrack.track;
+  }
 }
 
 export enum LoopMode {
