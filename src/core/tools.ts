@@ -29,6 +29,7 @@ export const createCurrentSongEmbed = (
     `[${track.title}](${track.url})
     
     \`Duration:\` ${formatDuration(track.duration)}
+
     \`Requested by:\` <@${track.requester.id}>
     `
   );
@@ -36,3 +37,8 @@ export const createCurrentSongEmbed = (
 
   return embed;
 };
+
+export const trackAsText = (track: Track) =>
+  `[${track.title}](${track.url}) · (\`${formatDuration(
+    track.duration
+  )}\`) Requested by <@${track.requester.id}>`;

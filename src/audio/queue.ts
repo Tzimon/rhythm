@@ -7,14 +7,15 @@ import {
 } from '@discordjs/voice';
 import { Guild, VoiceChannel } from 'discord.js';
 import ytdl from 'ytdl-core';
-import { connect, disconnect } from './audio-handler';
+import { connect, disconnect, getQueue } from './audio-handler';
 import { CurrentTrackInfo, Track } from './track';
 import { NothingPlayingError } from '../errors/nothing-playing-error';
+import { OutOfRangeError } from '../commands/out-of-range-error';
 
 export class Queue {
-  private tracks: Array<Track> = [];
-  private currentTrack?: CurrentTrackInfo;
+  public tracks: Array<Track> = [];
   public loopMode: LoopMode = LoopMode.NO_LOOP;
+  private currentTrack?: CurrentTrackInfo;
 
   public constructor(private readonly guild: Guild) {}
 
@@ -29,6 +30,8 @@ export class Queue {
   }
 
   public async play(channel: VoiceChannel): Promise<void> {
+    if (this.currentTrack) return;
+
     const nextTrack = this.tracks.shift();
 
     if (!nextTrack) {
@@ -98,6 +101,15 @@ export class Queue {
   public get playingTrack(): Track {
     if (!this.currentTrack) throw new NothingPlayingError();
     return this.currentTrack.track;
+  }
+
+  public set volume(volume: number) {
+    const maximum: number = 10000;
+
+    if (volume > maximum || volume < 0) throw new OutOfRangeError(0, maximum);
+    if (!this.currentTrack) throw new NothingPlayingError();
+
+    this.currentTrack.resource.volume?.setVolume(volume / 100);
   }
 }
 

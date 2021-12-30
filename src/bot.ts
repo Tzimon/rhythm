@@ -9,6 +9,8 @@ import { playSkipCommand } from './commands/play-skip-command';
 import { loopCommand } from './commands/loop-command';
 import { loopQueueCommand } from './commands/loop-queue-command';
 import { nowPlayingCommand } from './commands/now-playing';
+import { grabCommand } from './commands/grab-command';
+import { queueCommand } from './commands/queue-command';
 
 const defaultPrefix: string = '!';
 
@@ -29,6 +31,8 @@ const commands: Array<Command> = [
   loopCommand,
   loopQueueCommand,
   nowPlayingCommand,
+  grabCommand,
+  queueCommand,
 ];
 
 export class Bot {
