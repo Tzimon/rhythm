@@ -1,13 +1,7 @@
 import { AudioPlayer, AudioResource } from '@discordjs/voice';
 import { User } from 'discord.js';
 
-export interface Queue {
-  songs: Array<Song>;
-  loopMode: LoopMode;
-  playing?: CurrentSongInfo;
-}
-
-export interface Song {
+export interface Track {
   title: string;
   url: string;
   duration: number;
@@ -16,14 +10,8 @@ export interface Song {
   requester: User;
 }
 
-export interface CurrentSongInfo {
-  song: Song;
+export interface CurrentTrackInfo {
+  track: Track;
   audioPlayer: AudioPlayer;
   resource: AudioResource;
-}
-
-export enum LoopMode {
-  NO_LOOP,
-  LOOP_SONG,
-  LOOP_QUEUE,
 }

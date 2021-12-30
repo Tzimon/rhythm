@@ -1,23 +1,45 @@
-import { Client } from 'discord.js';
-import * as commands from './commands';
+import { Client, IntentsString, TextBasedChannels } from 'discord.js';
 import type { ClientUser, Message } from 'discord.js';
-import type { Config } from './types/config.type';
-import type { Command, CommandInfo } from './types/command.type';
-import { BotError } from './errors';
+import { joinCommand } from './commands/join-command';
+import { leaveCommand } from './commands/leave-command';
+import { playCommand } from './commands/play-command';
+import { skipCommand } from './commands/skip-command';
+import { Command, CommandCallInfo, CommandLogger } from './core/command';
+import { playSkipCommand } from './commands/play-skip-command';
+import { loopCommand } from './commands/loop-command';
+
+const defaultPrefix: string = '!';
+
+const intents: Array<IntentsString> = [
+  'GUILDS',
+  'GUILD_PRESENCES',
+  'GUILD_MEMBERS',
+  'GUILD_MESSAGES',
+  'GUILD_VOICE_STATES',
+];
+
+const commands: Array<Command> = [
+  joinCommand,
+  leaveCommand,
+  playCommand,
+  skipCommand,
+  playSkipCommand,
+  loopCommand,
+];
 
 export class Bot {
-  private readonly client: Client;
+  private readonly client: Client = new Client({ intents });
 
-  public constructor(private readonly config: Config) {
-    this.client = new Client({
-      intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES'],
-    });
-
-    this.client.on('ready', () => this.setup());
-    this.client.on('messageCreate', (message) => this.processMessage(message));
+  public constructor() {
+    this.registerEvents();
   }
 
-  public launch(token: string): void {
+  private registerEvents(): void {
+    this.client.on('ready', () => this.setup());
+    this.client.on('messageCreate', (message) => this.parseMessage(message));
+  }
+
+  public login(token: string): void {
     this.client.login(token).then(() => console.log('Successfully logged in'));
   }
 
@@ -31,9 +53,12 @@ export class Bot {
     });
   }
 
-  private processMessage(message: Message): void {
-    const { author, channel, member, content } = message;
-
+  private async parseMessage({
+    author,
+    channel,
+    member,
+    content,
+  }: Message): Promise<void> {
     if (author.bot) return;
 
     if (!member) {
@@ -42,43 +67,38 @@ export class Bot {
     }
 
     if (content.length === 0) return;
-    if (!content.startsWith(this.config.defaultPrefix)) return;
+    if (!content.startsWith(defaultPrefix)) return;
 
-    const args = content.slice(this.config.defaultPrefix.length).split(/ +/);
+    const args = content.slice(defaultPrefix.length).split(/ +/);
     const commandName = args.shift()?.toLowerCase();
 
     if (!commandName) return;
 
-    const commandInfo: CommandInfo = { author, channel, member, args };
+    const logger = new CommandLogger(channel);
+    const commandCallInfo: CommandCallInfo = { author, member, args, logger };
 
-    try {
-      for (const command of Object.values(commands)) {
-        if (command.name.toLowerCase() === commandName) {
-          this.tryExecute(command, commandInfo);
-          return;
-        }
-      }
+    for (const command of commands) {
+      if (command.name.toLowerCase() !== commandName) continue;
+      return await this.tryExecute(channel, command, commandCallInfo);
+    }
 
-      for (const command of Object.values(commands)) {
-        for (const alias of command.aliases) {
-          if (alias.toLowerCase() === commandName) {
-            this.tryExecute(command, commandInfo);
-            return;
-          }
-        }
+    for (const command of commands) {
+      for (const alias of command.aliases) {
+        if (alias.toLowerCase() !== commandName) continue;
+        return await this.tryExecute(channel, command, commandCallInfo);
       }
-    } catch {}
+    }
   }
 
   private async tryExecute(
+    channel: TextBasedChannels,
     command: Command,
-    commandInfo: CommandInfo
+    commandInfo: CommandCallInfo
   ): Promise<void> {
     try {
       await command.execute(commandInfo);
     } catch (error) {
-      const botError = error as BotError;
-      commandInfo.channel.send(`**${botError.toString()}**`);
+      channel.send(`**${error}**`);
     }
   }
 }
