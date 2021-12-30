@@ -98,6 +98,10 @@ export class Queue {
     this.currentTrack.audioPlayer.stop();
   }
 
+  public remove(index: number): Track {
+    return this.tracks.splice(index, 1)[0];
+  }
+
   public get playingTrack(): Track {
     if (!this.currentTrack) throw new NothingPlayingError();
     return this.currentTrack.track;
