@@ -8,14 +8,16 @@ import { BotError } from './errors';
 export class Bot {
   private readonly client: Client;
 
-  public constructor(token: string, private readonly config: Config) {
+  public constructor(private readonly config: Config) {
     this.client = new Client({
       intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES'],
     });
 
     this.client.on('ready', () => this.setup());
     this.client.on('messageCreate', (message) => this.processMessage(message));
+  }
 
+  public launch(token: string): void {
     this.client.login(token).then(() => console.log('Successfully logged in'));
   }
 

@@ -9,4 +9,5 @@ import { Config } from './src/types/config.type';
 
 const config: Config = JSON.parse(readFileSync('./config.json', 'utf-8'));
 
-new Bot(botToken, config);
+console.log('Launching bot...');
+new Bot(config).launch(botToken);

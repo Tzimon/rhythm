@@ -17,7 +17,7 @@ export class NothingPlayingError extends BotError {
 }
 
 export class NoMatchesError extends BotError {
-  message = 'No machtes';
+  message = 'No matches';
 }
 
 export class VideoUnavailableError extends BotError {
