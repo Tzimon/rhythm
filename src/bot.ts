@@ -11,6 +11,7 @@ import { loopQueueCommand } from './commands/loop-queue-command';
 import { nowPlayingCommand } from './commands/now-playing';
 import { grabCommand } from './commands/grab-command';
 import { queueCommand } from './commands/queue-command';
+import { volumeCommand } from './commands/volume-command';
 
 const defaultPrefix: string = '!';
 
@@ -33,6 +34,7 @@ const commands: Array<Command> = [
   nowPlayingCommand,
   grabCommand,
   queueCommand,
+  volumeCommand,
 ];
 
 export class Bot {

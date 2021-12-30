@@ -10,7 +10,7 @@ import ytdl from 'ytdl-core';
 import { connect, disconnect, getQueue } from './audio-handler';
 import { CurrentTrackInfo, Track } from './track';
 import { NothingPlayingError } from '../errors/nothing-playing-error';
-import { OutOfRangeError } from '../commands/out-of-range-error';
+import { OutOfRangeError } from '../errors/out-of-range-error';
 
 export class Queue {
   public tracks: Array<Track> = [];
