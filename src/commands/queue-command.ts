@@ -16,18 +16,21 @@ export const queueCommand: Command = {
     const embed = new MessageEmbed();
 
     embed.setTitle(`Queue for ${guild.name}`);
-    embed.addField(
-      'Now Playing',
-      `[${currentTrack.title}](${currentTrack.url})`
-    );
+    embed.addField('Now Playing', trackAsText(currentTrack));
 
-    if (tracks.length > 0) {
-      embed.addField(
-        'Up Next',
-        tracks
-          .map((song, index) => `\`${index + 1}.\` ${trackAsText(song)}`)
-          .join('\n\n')
-      );
+    const trackCount = tracks.length;
+    const displayLimit = 5;
+
+    if (trackCount > 0) {
+      let tracksAsText = tracks
+        .map((song, index) => `\`${index + 1}.\` ${trackAsText(song)}`)
+        .slice(0, displayLimit)
+        .join('\n\n');
+
+      if (trackCount > displayLimit)
+        tracksAsText += `\n\n${trackCount - displayLimit} more`;
+
+      embed.addField('Up Next', tracksAsText);
     }
 
     await logger.log('', embed);
