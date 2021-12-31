@@ -51,6 +51,7 @@ export class Queue {
       const stream = ytdl(nextTrack.url, {
         filter: 'audioonly',
         quality: 'highestaudio',
+        highWaterMark: 1 << 25,
       });
 
       const resource = createAudioResource(stream, {
@@ -58,12 +59,8 @@ export class Queue {
         inlineVolume: true,
       });
 
-      stream.on('error', (error) =>
-        console.log('Error: stream (queue):', error)
-      );
-      audioPlayer.on('error', (error) =>
-        console.log('Error: audioPlayer (queue):', error)
-      );
+      stream.on('error', () => console.log('Error: stream (queue)'));
+      audioPlayer.on('error', () => console.log('Error: audioPlayer (queue)'));
 
       connection.subscribe(audioPlayer);
       audioPlayer.play(resource);
