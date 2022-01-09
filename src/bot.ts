@@ -13,6 +13,7 @@ import { grabCommand } from './commands/grab-command';
 import { queueCommand } from './commands/queue-command';
 import { volumeCommand } from './commands/volume-command';
 import { removeCommand } from './commands/remove-command';
+import { BotError } from './core/bot-error';
 
 const defaultPrefix: string = '!';
 
@@ -111,6 +112,10 @@ export class Bot {
       await command.execute(commandInfo);
     } catch (error) {
       channel.send(`**${error}**`);
+
+      if (!(error instanceof BotError)) {
+        console.log(error);
+      }
     }
   }
 }
