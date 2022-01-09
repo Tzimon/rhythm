@@ -1,4 +1,4 @@
-import { Client, IntentsString, TextBasedChannels } from 'discord.js';
+import { Client, IntentsString, TextBasedChannel } from 'discord.js';
 import type { ClientUser, Message } from 'discord.js';
 import { Command, CommandCallInfo, CommandLogger } from './core/command';
 import { joinCommand } from './commands/join-command';
@@ -104,7 +104,7 @@ export class Bot {
   }
 
   private async tryExecute(
-    channel: TextBasedChannels,
+    channel: TextBasedChannel,
     command: Command,
     commandInfo: CommandCallInfo
   ): Promise<void> {

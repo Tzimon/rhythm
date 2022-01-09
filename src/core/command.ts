@@ -2,7 +2,7 @@ import {
   GuildMember,
   Message,
   MessageEmbed,
-  TextBasedChannels,
+  TextBasedChannel,
   User,
 } from 'discord.js';
 
@@ -20,7 +20,7 @@ export interface CommandCallInfo {
 }
 
 export class CommandLogger {
-  public constructor(private channel: TextBasedChannels) {}
+  public constructor(private channel: TextBasedChannel) {}
 
   public async sendTyping(): Promise<void> {
     return await this.channel.sendTyping();
