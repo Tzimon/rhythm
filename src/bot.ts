@@ -111,7 +111,7 @@ export class Bot {
     try {
       await command.execute(commandInfo);
     } catch (error) {
-      channel.send(`**${error}**`);
+      channel.send(`**${error}**`).catch();
 
       if (!(error instanceof BotError)) {
         console.log(error);
