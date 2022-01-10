@@ -33,7 +33,7 @@ export const createCurrentSongEmbed = (
     \`Requested by:\` <@${track.requester.id}>
     `
   );
-  embed.setFooter(`${formatDate(new Date())} - ${guild.name}`);
+  embed.setFooter({ text: `${formatDate(new Date())} - ${guild.name}` });
 
   return embed;
 };

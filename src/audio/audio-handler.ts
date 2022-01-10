@@ -1,5 +1,5 @@
 import {
-  AudioPlayerStatus,
+  DiscordGatewayAdapterCreator,
   entersState,
   getVoiceConnection,
   joinVoiceChannel,
@@ -37,7 +37,8 @@ export const connect = async (
   const connection = joinVoiceChannel({
     channelId: channel.id,
     guildId: guild.id,
-    adapterCreator: guild.voiceAdapterCreator,
+    adapterCreator:
+      guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
   });
 
   connection.on('stateChange', async (_oldState, newState) => {

@@ -30,7 +30,7 @@ export const playCommand: Command = {
     embed.setURL(track.url);
     embed.addField('Channel', track.channelName, true);
     embed.addField('Song Duration', formatDuration(track.duration), true);
-    embed.setAuthor('Added to queue');
+    embed.setAuthor({ name: 'Added to queue' });
     embed.setThumbnail(track.thumbnailUrl);
 
     await searchingMessage;
