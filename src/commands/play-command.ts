@@ -14,9 +14,8 @@ export const playCommand: Command = {
     if (args.length <= 0) throw new InvalidSyntaxError();
 
     const query = args.join(' ');
-    const searchingMessage = logger.logNative(
-      `**🎵 Searching 🔎** \`${query}\``
-    );
+
+    await logger.logNative(`**🎵 Searching 🔎** \`${query}\``);
 
     const track = await searchTrack(user, query);
     const queue = getQueue(guild);
@@ -33,7 +32,6 @@ export const playCommand: Command = {
     embed.setAuthor({ name: 'Added to queue' });
     embed.setThumbnail(track.thumbnailUrl);
 
-    await searchingMessage;
     await logger.log('', embed);
   },
 };

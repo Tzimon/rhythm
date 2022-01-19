@@ -59,8 +59,8 @@ export class Queue {
         inlineVolume: true,
       });
 
-      stream.on('error', () => console.log('Error: stream (queue)'));
-      audioPlayer.on('error', () => console.log('Error: audioPlayer (queue)'));
+      stream.on('error', () => {});
+      audioPlayer.on('error', () => {});
 
       connection.subscribe(audioPlayer);
       audioPlayer.play(resource);
